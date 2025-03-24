@@ -42,8 +42,10 @@ const server = new McpServer({
 // Add command line argument parsing
 const args = process.argv.slice(2);
 const serverArg = args.find(arg => arg.startsWith('--server='));
+const portArg = args.find(arg => arg.startsWith('--port='));
 const serverUrl = serverArg ? serverArg.split('=')[1] : 'localhost';
-const WS_URL = serverUrl === 'localhost' ? `ws://${serverUrl}` : `wss://${serverUrl}`;
+const port = portArg ? parseInt(portArg.split('=')[1]) : 3056;  // 默认使用 3056
+const WS_URL = `ws://${serverUrl}`;
 
 // Document Info Tool
 server.tool(
@@ -891,14 +893,14 @@ function processFigmaNodeResponse(result: unknown): any {
 }
 
 // Update the connectToFigma function
-function connectToFigma(port: number = 3055) {
+function connectToFigma(customPort?: number) {
   // If already connected, do nothing
   if (ws && ws.readyState === WebSocket.OPEN) {
     logger.info('Already connected to Figma');
     return;
   }
 
-  const wsUrl = serverUrl === 'localhost' ? `${WS_URL}:${port}` : WS_URL;
+  const wsUrl = `${WS_URL}:${customPort || port}`;  // 使用传入的端口或命令行指定的端口
   logger.info(`Connecting to Figma socket server at ${wsUrl}...`);
   ws = new WebSocket(wsUrl);
 
@@ -956,7 +958,7 @@ function connectToFigma(port: number = 3055) {
 
     // Attempt to reconnect
     logger.info('Attempting to reconnect in 2 seconds...');
-    setTimeout(() => connectToFigma(port), 2000);
+    setTimeout(() => connectToFigma(customPort), 2000);
   });
 }
 
@@ -1077,7 +1079,7 @@ server.tool(
 async function main() {
   try {
     // Try to connect to Figma socket server
-    connectToFigma();
+    connectToFigma(port);
   } catch (error) {
     logger.warn(`Could not connect to Figma initially: ${error instanceof Error ? error.message : String(error)}`);
     logger.warn('Will try to connect when the first command is sent');
@@ -1086,7 +1088,7 @@ async function main() {
   // Start the MCP server with stdio transport
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info('FigmaMCP server running on stdio');
+  logger.info(`FigmaMCP server running on stdio, connecting to WebSocket on port ${port}`);
 }
 
 // Run the server

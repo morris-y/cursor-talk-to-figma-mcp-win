@@ -3,7 +3,7 @@
 
 // Plugin state
 const state = {
-  serverPort: 3055, // Default port
+  serverPort: 3056, // Default port
 };
 
 // Show UI

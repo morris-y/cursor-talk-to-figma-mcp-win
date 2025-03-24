@@ -5,13 +5,14 @@ mkdir -p .cursor
 
 bun install
 
-# Create mcp.json with the current directory path
+# Create mcp.json with the correct configuration
 echo "{
   \"mcpServers\": {
     \"TalkToFigma\": {
       \"command\": \"bunx\",
       \"args\": [
-        \"cursor-talk-to-figma-mcp\"
+        \"cursor-talk-to-figma-mcp\",
+        \"--port=3056\"
       ]
     }
   }

@@ -1,5 +1,7 @@
 # Cursor Talk to Figma MCP
 
+> **Note**: This project is a fork of [sonnylazuardi/cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) with adjustments and optimizations specifically for Windows environments.
+
 This project implements a Model Context Protocol (MCP) integration between Cursor AI and Figma, allowing Cursor to communicate with Figma for reading designs and modifying them programmatically.
 
 https://github.com/user-attachments/assets/129a14d2-ed73-470f-9a4c-2240b2a4885c
@@ -24,6 +26,7 @@ curl -fsSL https://bun.sh/install | bash
 bun setup
 ```
 
+## Use and Connect
 
 3. Start the Websocket server
 
@@ -34,8 +37,18 @@ bun socket
 4. MCP server
 
 ```bash
-bunx cursor-talk-to-figma-mcp
+## 以下是几种不同的运行 MCP 服务器的方式
+## 原始方式（可能在 Windows 上有问题）
+## bunx cursor-talk-to-figma-mcp
+
+## 通过源代码直接运行（开发时使用）
+## bun run src/talk_to_figma_mcp/server.ts -- --port=3056
+
+## 推荐方式：使用 node 运行构建后的文件（最稳定，尤其在 Windows 上）
+node dist/server.js --port=3056
 ```
+
+> **注意**：在 Windows 系统上，我们建议使用 `node dist/server.js --port=3056` 来连接 MCP 服务器，这样可以避免路径和环境变量问题。同时需要修改 `.cursor/mcp.json` 配置文件，使用 node 而不是 bun/bunx。
 
 5. Install [Figma Plugin](#figma-plugin)
 
@@ -53,14 +66,30 @@ Add the server to your Cursor MCP configuration in `~/.cursor/mcp.json`:
 {
   "mcpServers": {
     "TalkToFigma": {
-      "command": "bunx",
+      "command": "node",
       "args": [
-        "cursor-talk-to-figma-mcp"
+        "PATH_TO_YOUR_PROJECT/dist/server.js",
+        "--port=3056"
       ]
     }
   }
 }
 ```
+
+> **Windows 用户注意**：在 Windows 系统上，请确保使用完整的绝对路径并使用双反斜杠，例如：
+> ```json
+> {
+>   "mcpServers": {
+>     "TalkToFigma": {
+>       "command": "node",
+>       "args": [
+>         "C:\\Users\\YourUsername\\path\\to\\project\\dist\\server.js",
+>         "--port=3056"
+>       ]
+>     }
+>   }
+> }
+> ```
 
 ### WebSocket Server
 
